@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- Added `/remote` command to restart pi in remote mode with session preservation
+
 ## [0.56.0] - 2026-03-04
 
 ### New Features
