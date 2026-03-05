@@ -1969,6 +1969,11 @@ export class InteractiveMode {
 				this.editor.setText("");
 				return;
 			}
+			if (text === "/remote") {
+				this.editor.setText("");
+				await this.handleRemoteCommand();
+				return;
+			}
 			if (text === "/quit") {
 				this.editor.setText("");
 				await this.shutdown();
@@ -3946,6 +3951,54 @@ export class InteractiveMode {
 		this.chatContainer.addChild(new Spacer(1));
 		this.chatContainer.addChild(new Text(theme.fg("dim", `Session name set: ${name}`), 1, 0));
 		this.ui.requestRender();
+	}
+
+	private async handleRemoteCommand(): Promise<void> {
+		if (this.session.isStreaming) {
+			this.showWarning("Wait for the current response to finish before starting remote access.");
+			return;
+		}
+
+		// Show info message
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(new Text(theme.bold("Remote Access Mode"), 1, 0));
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(
+			new Text(
+				theme.fg(
+					"dim",
+					"Pi will restart in remote mode. Your session will be preserved.\nYou can access it from both local terminal and remote browser.",
+				),
+				1,
+				0,
+			),
+		);
+		this.chatContainer.addChild(new Spacer(1));
+		this.chatContainer.addChild(new Text(theme.fg("dim", "Restarting in 2 seconds..."), 1, 0));
+		this.ui.requestRender();
+
+		// Wait 2 seconds so user can read the message
+		await new Promise((resolve) => setTimeout(resolve, 2000));
+
+		// Get current session path for --continue
+		const sessionFile = this.session.sessionFile;
+		const continueFlag = sessionFile ? "--continue" : "";
+
+		// Prepare restart command
+		const { spawn } = await import("node:child_process");
+
+		// Shutdown current pi
+		await this.shutdown();
+
+		// Restart with pi-remote
+		const args = continueFlag ? [continueFlag] : [];
+		const child = spawn("pi-remote", ["--", ...args], {
+			detached: true,
+			stdio: "inherit",
+		});
+
+		child.unref();
+		process.exit(0);
 	}
 
 	private handleSessionCommand(): void {
