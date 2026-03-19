@@ -1,5 +1,5 @@
 {
-	"name": "@mariozechner/pi-coding-agent",
+	"name": "@q.roy/pi-coding-agent",
 	"version": "0.60.0",
 	"description": "Coding agent CLI with read, bash, edit, write tools and session management",
 	"type": "module",
