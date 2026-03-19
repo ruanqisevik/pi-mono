@@ -12,8 +12,9 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
+          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
       - name: Sync with upstream
@@ -21,7 +22,6 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git remote add upstream https://github.com/badlogic/pi-mono.git
-          git fetch upstream
-          git checkout main
+          git fetch upstream main
           git merge upstream/main --no-edit
-          git push origin main
+          git push origin HEAD:${{ github.event.repository.default_branch }}
